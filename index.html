@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Olive Oil Imports - Ukraine</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f3e7; /* default beige */
+      padding: 2rem;
+      color: #333;
+      transition: background 0.3s;
+    }
+    .dark-mode {
+      background: #2c2c2c;
+      color: #eee;
+    }
+    h2 {
+      font-size: 1.4rem;
+      font-weight: normal;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .chart-container {
+      flex: 1 1 400px;
+    }
+    .text-container {
+      flex: 1 1 300px;
+      font-size: 0.95rem;
+      max-width: 400px;
+      animation: fadeInText 2s ease-in;
+    }
+    canvas {
+      max-width: 100%;
+    }
+    .legend-container {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .legend-container span {
+      margin-right: 1.5rem;
+      display: inline-block;
+    }
+    .controls {
+      text-align: center;
+      margin: 1rem 0;
+    }
+    .controls button {
+      margin: 0 0.3rem;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    @keyframes fadeInText {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <h2>Growth of Olive Oil Imports from Italy to Ukraine (Jan–Feb 2023–2025)</h2>
+  <div class="legend-container">
+    <span style="color:#b7c59e;"><strong>&#9632;</strong> Total Imports (World)</span>
+    <span style="color:#6d8b5b;"><strong>&#9632;</strong> Imports from Italy</span>
+  </div>
+  <div class="controls">
+    <button onclick="toggleAnimation()">Pause / Resume</button>
+    <button onclick="toggleTheme()">Toggle Theme</button>
+  </div>
+  <div class="container">
+    <div class="chart-container">
+      <canvas id="importChart"></canvas>
+    </div>
+    <div class="text-container">
+      <p>
+        From January to February 2025, olive oil imports to Ukraine from Italy grew by 3% compared to the same period in 2024, reaching €0.7 million.<br>
+        Total olive oil imports from all countries decreased by 11%, amounting to €1.7 million.<br>
+        Italy remains the top supplier with a 41% market share, followed by Spain (35%) and Greece (28%).<br>
+        <span style="font-weight: normal;">Source: Trade Data Monitor</span>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('importChart').getContext('2d');
+    let animationRunning = true;
+    let timeoutIds = [];
+
+    const data = {
+      labels: ['2023', '2024', '2025'],
+      datasets: [
+        {
+          label: 'Total Imports (World)',
+          data: [0, 0, 0],
+          backgroundColor: '#b7c59e'
+        },
+        {
+          label: 'Imports from Italy',
+          data: [0, 0, 0],
+          backgroundColor: '#6d8b5b'
+        }
+      ]
+    };
+
+    const options = {
+      responsive: true,
+      animation: {
+        duration: 1000,
+        easing: 'easeOutBounce'
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return value.toLocaleString('en-EN') + ' €';
+            }
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': ' + context.parsed.y.toLocaleString('en-EN') + ' €';
+            }
+          }
+        }
+      }
+    };
+
+    const importChart = new Chart(ctx, {
+      type: 'bar',
+      data: data,
+      options: options
+    });
+
+    const realData = {
+      world: [1110380, 1952815, 1730981],
+      italy: [437957, 685878, 704632]
+    };
+
+    function animateLoop() {
+      if (!animationRunning) return;
+
+      data.datasets[0].data = [0, 0, 0];
+      data.datasets[1].data = [0, 0, 0];
+      importChart.update();
+
+      timeoutIds.push(setTimeout(() => {
+        data.datasets[0].data[0] = realData.world[0];
+        data.datasets[1].data[0] = realData.italy[0];
+        importChart.update();
+      }, 1000));
+
+      timeoutIds.push(setTimeout(() => {
+        data.datasets[0].data[1] = realData.world[1];
+        data.datasets[1].data[1] = realData.italy[1];
+        importChart.update();
+      }, 2200));
+
+      timeoutIds.push(setTimeout(() => {
+        data.datasets[0].data[2] = realData.world[2];
+        data.datasets[1].data[2] = realData.italy[2];
+        importChart.update();
+      }, 3400));
+
+      timeoutIds.push(setTimeout(() => animateLoop(), 6000));
+    }
+
+    function toggleAnimation() {
+      animationRunning = !animationRunning;
+      if (!animationRunning) {
+        timeoutIds.forEach(id => clearTimeout(id));
+        timeoutIds = [];
+      } else {
+        animateLoop();
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    animateLoop();
+  </script>
+</body>
+</html>
